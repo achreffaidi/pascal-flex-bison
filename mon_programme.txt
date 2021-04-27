@@ -1,0 +1,22 @@
+program tp1;
+var fgd3f, x : integer ; 
+function c ( ) 
+var x : array [ 1 .. 4 ] of integer ;
+var x,f:integer;
+begin
+a := 3 + f ; 
+while(a) do 
+    begin
+        write(x);
+    end;
+if(x) then read(y) else read();
+end
+/* 
+this is a comment
+*/
+procedure x(x : array [ 1 .. 4 ] of integer)
+begin
+write(sd);
+end
+begin 
+end
