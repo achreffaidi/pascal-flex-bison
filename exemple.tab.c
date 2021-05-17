@@ -73,14 +73,30 @@
 	
 
 #include <stdio.h>	
+#include <string.h>
+#include <stdlib.h>
+#include <glib.h>
+
+
 int yyerror(char const *msg);	
 int yylex(void);
+
+int context = 0;
 extern int yylineno;
+
+GHashTable* table_variable;
+
+typedef struct Variable Variable;
+
+struct Variable{
+        char* type;
+        int affectation;
+};
 
 
 
 /* Line 189 of yacc.c  */
-#line 84 "exemple.tab.c"
+#line 100 "exemple.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -154,7 +170,21 @@ extern int yylineno;
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+typedef union YYSTYPE
+{
+
+/* Line 214 of yacc.c  */
+#line 27 "exemple.y"
+
+        long nombre;
+        char* texte;
+
+
+
+
+/* Line 214 of yacc.c  */
+#line 187 "exemple.tab.c"
+} YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -178,7 +208,7 @@ typedef struct YYLTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 182 "exemple.tab.c"
+#line 212 "exemple.tab.c"
 
 #ifdef short
 # undef short
@@ -512,18 +542,18 @@ static const yytype_int8 yyrhs[] =
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
-static const yytype_uint8 yyrline[] =
+static const yytype_uint16 yyrline[] =
 {
-       0,    60,    60,    61,    62,    63,    64,    65,    66,    68,
-      69,    71,    72,    75,    76,    77,    79,    80,    81,    83,
-      84,    85,    86,    87,    88,    89,    90,    91,    93,    94,
-      96,    97,    98,   100,   101,   102,   103,   104,   105,   107,
-     108,   109,   110,   112,   113,   115,   116,   118,   119,   120,
-     122,   123,   124,   127,   128,   129,   130,   131,   132,   134,
-     135,   136,   137,   139,   140,   141,   143,   144,   145,   147,
-     148,   149,   150,   151,   152,   154,   155,   156,   158,   159,
-     160,   162,   163,   165,   166,   167,   169,   170,   171,   172,
-     173
+       0,   105,   105,   106,   107,   108,   109,   110,   111,   113,
+     114,   116,   117,   120,   121,   122,   124,   141,   160,   162,
+     163,   164,   165,   166,   167,   168,   169,   170,   172,   173,
+     175,   176,   181,   183,   204,   222,   223,   241,   259,   261,
+     262,   263,   264,   266,   267,   269,   270,   272,   273,   274,
+     276,   291,   292,   295,   296,   297,   298,   299,   300,   302,
+     303,   304,   305,   307,   308,   309,   311,   312,   313,   315,
+     316,   317,   318,   319,   320,   322,   323,   324,   326,   341,
+     356,   358,   359,   361,   362,   363,   365,   382,   398,   399,
+     400
 };
 #endif
 
@@ -1588,280 +1618,534 @@ yyreduce:
         case 6:
 
 /* Line 1455 of yacc.c  */
-#line 64 "exemple.y"
+#line 109 "exemple.y"
     {yyerror (" Program's name invalid on line : "); ;}
     break;
 
   case 7:
 
 /* Line 1455 of yacc.c  */
-#line 65 "exemple.y"
+#line 110 "exemple.y"
     {yyerror (" Semicolon expected on line : "); ;}
     break;
 
   case 8:
 
 /* Line 1455 of yacc.c  */
-#line 66 "exemple.y"
+#line 111 "exemple.y"
     {yyerror (" Begin expected on line : "); ;}
     break;
 
   case 12:
 
 /* Line 1455 of yacc.c  */
-#line 72 "exemple.y"
+#line 117 "exemple.y"
     {yyerror (" Semicolon expected on line : "); ;}
     break;
 
   case 14:
 
 /* Line 1455 of yacc.c  */
-#line 76 "exemple.y"
+#line 121 "exemple.y"
     {yyerror (" Type expected on line : "); ;}
     break;
 
   case 15:
 
 /* Line 1455 of yacc.c  */
-#line 77 "exemple.y"
+#line 122 "exemple.y"
     {yyerror (" Colon expected on line : "); ;}
+    break;
+
+  case 16:
+
+/* Line 1455 of yacc.c  */
+#line 124 "exemple.y"
+    {
+
+                        printf(" Declaring Variable ==> %s \n", strdup((yyvsp[(1) - (1)].texte)));
+                        Variable* var=malloc(sizeof(Variable));
+                        if(var!=NULL){
+                                var->type=strdup("variable");
+                                var->affectation=0;
+                                if(!g_hash_table_insert(table_variable,strdup((yyvsp[(1) - (1)].texte)),var)){
+                                        fprintf(stderr,"ERREUR - PROBLEME CREATION VARIABLE !\n");
+                                        exit(-1);
+                                }
+                        }else{
+                                fprintf(stderr,"ERREUR - PROBLEME ALLOCATION MEMOIRE VARIABLE !\n");
+                                exit(-1);
+                        }
+
+;}
+    break;
+
+  case 17:
+
+/* Line 1455 of yacc.c  */
+#line 142 "exemple.y"
+    {
+
+                        printf(" Declaring Variable ==> %s \n", strdup((yyvsp[(1) - (3)].texte)));
+                        Variable* var=malloc(sizeof(Variable));
+                        if(var!=NULL){
+                                var->type=strdup("variable");
+                                var->affectation=0;
+                                if(!g_hash_table_insert(table_variable,strdup((yyvsp[(1) - (3)].texte)),var)){
+                                        fprintf(stderr,"ERREUR - PROBLEME CREATION VARIABLE !\n");
+                                        exit(-1);
+                                }
+                        }else{
+                                fprintf(stderr,"ERREUR - PROBLEME ALLOCATION MEMOIRE VARIABLE !\n");
+                                exit(-1);
+                        }
+
+;}
     break;
 
   case 18:
 
 /* Line 1455 of yacc.c  */
-#line 81 "exemple.y"
+#line 160 "exemple.y"
     {yyerror (" Unexpected Comma on line : "); ;}
     break;
 
   case 21:
 
 /* Line 1455 of yacc.c  */
-#line 85 "exemple.y"
+#line 164 "exemple.y"
     {yyerror (" expected [ on line : "); ;}
     break;
 
   case 22:
 
 /* Line 1455 of yacc.c  */
-#line 86 "exemple.y"
+#line 165 "exemple.y"
     {yyerror (" expected Literal number on line : "); ;}
     break;
 
   case 23:
 
 /* Line 1455 of yacc.c  */
-#line 87 "exemple.y"
+#line 166 "exemple.y"
     {yyerror (" expected ..  on line : "); ;}
     break;
 
   case 24:
 
 /* Line 1455 of yacc.c  */
-#line 88 "exemple.y"
+#line 167 "exemple.y"
     {yyerror (" expected Literal number on line : "); ;}
     break;
 
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 89 "exemple.y"
+#line 168 "exemple.y"
     {yyerror (" expected ]  on line : "); ;}
     break;
 
   case 26:
 
 /* Line 1455 of yacc.c  */
-#line 90 "exemple.y"
+#line 169 "exemple.y"
     {yyerror (" expected of on line : "); ;}
     break;
 
   case 27:
 
 /* Line 1455 of yacc.c  */
-#line 91 "exemple.y"
+#line 170 "exemple.y"
     {yyerror (" expected Type on line : "); ;}
+    break;
+
+  case 31:
+
+/* Line 1455 of yacc.c  */
+#line 177 "exemple.y"
+    {
+                            context--; 
+                            printf(" ============ Change to Context ========> %d \n", context);
+                        ;}
     break;
 
   case 32:
 
 /* Line 1455 of yacc.c  */
-#line 98 "exemple.y"
+#line 181 "exemple.y"
     {yyerror (" Begin expected onx line : "); ;}
+    break;
+
+  case 33:
+
+/* Line 1455 of yacc.c  */
+#line 184 "exemple.y"
+    {
+                        context++; 
+                        printf(" ============ Change to Context ========> %d \n", context);
+                        printf(" Declaring Procedure ==> %s \n", strdup((yyvsp[(2) - (2)].texte)));
+        
+                        Variable* var=malloc(sizeof(Variable));
+                        if(var!=NULL){
+                                var->type=strdup("method");
+                                if(!g_hash_table_insert(table_variable,strdup((yyvsp[(2) - (2)].texte)),var)){
+                                        fprintf(stderr,"ERREUR - PROBLEME CREATION VARIABLE !\n");
+                                        exit(-1);
+                                }
+                        }else{
+                                fprintf(stderr,"ERREUR - PROBLEME ALLOCATION MEMOIRE VARIABLE !\n");
+                                exit(-1);
+                        }
+
+
+
+;}
+    break;
+
+  case 34:
+
+/* Line 1455 of yacc.c  */
+#line 205 "exemple.y"
+    {
+                        context++; 
+                        printf(" ============ Change to Context ========> %d \n", context);
+                        printf(" Declaring Procedure ==> %s \n", strdup((yyvsp[(2) - (3)].texte)));
+                         Variable* var=malloc(sizeof(Variable));
+                        if(var!=NULL){
+                                var->type=strdup("method");
+                                if(!g_hash_table_insert(table_variable,strdup((yyvsp[(2) - (3)].texte)),var)){
+                                        fprintf(stderr,"ERREUR - PROBLEME CREATION VARIABLE !\n");
+                                        exit(-1);
+                                }
+                        }else{
+                                fprintf(stderr,"ERREUR - PROBLEME ALLOCATION MEMOIRE VARIABLE !\n");
+                                exit(-1);
+                        }
+
+;}
     break;
 
   case 35:
 
 /* Line 1455 of yacc.c  */
-#line 102 "exemple.y"
+#line 222 "exemple.y"
     {yyerror (" expected Procedure name on line : "); ;}
+    break;
+
+  case 36:
+
+/* Line 1455 of yacc.c  */
+#line 224 "exemple.y"
+    {
+                        context++; 
+                        printf(" ============ Change to Context ========> %d \n", context);
+                        printf(" Declaring Function ==> %s \n", strdup((yyvsp[(2) - (2)].texte)));
+                         Variable* var=malloc(sizeof(Variable));
+                        if(var!=NULL){
+                                var->type=strdup("method");
+                                if(!g_hash_table_insert(table_variable,strdup((yyvsp[(2) - (2)].texte)),var)){
+                                        fprintf(stderr,"ERREUR - PROBLEME CREATION VARIABLE !\n");
+                                        exit(-1);
+                                }
+                        }else{
+                                fprintf(stderr,"ERREUR - PROBLEME ALLOCATION MEMOIRE VARIABLE !\n");
+                                exit(-1);
+                        }
+
+;}
+    break;
+
+  case 37:
+
+/* Line 1455 of yacc.c  */
+#line 242 "exemple.y"
+    {
+                        context++; 
+                        printf(" ============ Change to Context ========> %d \n", context);
+                        printf(" Declaring Function ==> %s \n", strdup((yyvsp[(2) - (3)].texte)));
+                         Variable* var=malloc(sizeof(Variable));
+                        if(var!=NULL){
+                                var->type=strdup("method");
+                                if(!g_hash_table_insert(table_variable,strdup((yyvsp[(2) - (3)].texte)),var)){
+                                        fprintf(stderr,"ERREUR - PROBLEME CREATION VARIABLE !\n");
+                                        exit(-1);
+                                }
+                        }else{
+                                fprintf(stderr,"ERREUR - PROBLEME ALLOCATION MEMOIRE VARIABLE !\n");
+                                exit(-1);
+                        }
+
+;}
     break;
 
   case 38:
 
 /* Line 1455 of yacc.c  */
-#line 105 "exemple.y"
+#line 259 "exemple.y"
     {yyerror (" expected Function name on line : "); ;}
     break;
 
   case 40:
 
 /* Line 1455 of yacc.c  */
-#line 108 "exemple.y"
+#line 262 "exemple.y"
     {yyerror (" expected )  on line : "); ;}
     break;
 
   case 41:
 
 /* Line 1455 of yacc.c  */
-#line 109 "exemple.y"
+#line 263 "exemple.y"
     {yyerror (" expected ( on line : "); ;}
     break;
 
   case 49:
 
 /* Line 1455 of yacc.c  */
-#line 120 "exemple.y"
+#line 274 "exemple.y"
     {yyerror (" expected ;  on line : "); ;}
+    break;
+
+  case 50:
+
+/* Line 1455 of yacc.c  */
+#line 277 "exemple.y"
+    {
+                         Variable* var=g_hash_table_lookup(table_variable,(yyvsp[(1) - (3)].texte));
+                                        if(var!=NULL){
+                                            
+                                                    printf(" Affecting value to ==> %s \n ", strdup((yyvsp[(1) - (3)].texte)));
+                                                    printf(" Use of Variable ========> %s \n", strdup((yyvsp[(1) - (3)].texte))); 
+                                                    var->affectation = var->affectation +1;
+                                                
+                                                
+                                        }else{
+                                                 printf(" ERROR Variable not Declared ==> %s \n", strdup((yyvsp[(1) - (3)].texte))); 
+                                        }
+                         
+                         ;}
     break;
 
   case 54:
 
 /* Line 1455 of yacc.c  */
-#line 128 "exemple.y"
+#line 296 "exemple.y"
     {yyerror (" expected Expression  on line : "); ;}
     break;
 
   case 55:
 
 /* Line 1455 of yacc.c  */
-#line 129 "exemple.y"
+#line 297 "exemple.y"
     {yyerror (" expected THEN  on line : "); ;}
     break;
 
   case 56:
 
 /* Line 1455 of yacc.c  */
-#line 130 "exemple.y"
+#line 298 "exemple.y"
     {yyerror (" expected Instruction  on line : "); ;}
     break;
 
   case 57:
 
 /* Line 1455 of yacc.c  */
-#line 131 "exemple.y"
+#line 299 "exemple.y"
     {yyerror (" expected Else  on line : "); ;}
     break;
 
   case 58:
 
 /* Line 1455 of yacc.c  */
-#line 132 "exemple.y"
+#line 300 "exemple.y"
     {yyerror (" expected Instruction  on line : "); ;}
     break;
 
   case 60:
 
 /* Line 1455 of yacc.c  */
-#line 135 "exemple.y"
+#line 303 "exemple.y"
     {yyerror (" expected Expression  on line : "); ;}
     break;
 
   case 61:
 
 /* Line 1455 of yacc.c  */
-#line 136 "exemple.y"
+#line 304 "exemple.y"
     {yyerror (" expected DO  on line : "); ;}
     break;
 
   case 62:
 
 /* Line 1455 of yacc.c  */
-#line 137 "exemple.y"
+#line 305 "exemple.y"
     {yyerror (" expected Instruction  on line : "); ;}
     break;
 
   case 64:
 
 /* Line 1455 of yacc.c  */
-#line 140 "exemple.y"
+#line 308 "exemple.y"
     {yyerror (" expected (  on line : "); ;}
     break;
 
   case 65:
 
 /* Line 1455 of yacc.c  */
-#line 141 "exemple.y"
+#line 309 "exemple.y"
     {yyerror (" expected )  on line : "); ;}
     break;
 
   case 67:
 
 /* Line 1455 of yacc.c  */
-#line 144 "exemple.y"
+#line 312 "exemple.y"
     {yyerror (" expected (  on line : "); ;}
     break;
 
   case 68:
 
 /* Line 1455 of yacc.c  */
-#line 145 "exemple.y"
+#line 313 "exemple.y"
     {yyerror (" expected )  on line : "); ;}
     break;
 
   case 70:
 
 /* Line 1455 of yacc.c  */
-#line 148 "exemple.y"
+#line 316 "exemple.y"
     {yyerror (" expected (  on line : "); ;}
     break;
 
   case 71:
 
 /* Line 1455 of yacc.c  */
-#line 149 "exemple.y"
+#line 317 "exemple.y"
     {yyerror (" expected )  on line : "); ;}
     break;
 
   case 73:
 
 /* Line 1455 of yacc.c  */
-#line 151 "exemple.y"
+#line 319 "exemple.y"
     {yyerror (" expected (  on line : "); ;}
     break;
 
   case 74:
 
 /* Line 1455 of yacc.c  */
-#line 152 "exemple.y"
+#line 320 "exemple.y"
     {yyerror (" expected )  on line : "); ;}
     break;
 
   case 77:
 
 /* Line 1455 of yacc.c  */
-#line 156 "exemple.y"
+#line 324 "exemple.y"
     {yyerror (" expected ]  on line : "); ;}
+    break;
+
+  case 78:
+
+/* Line 1455 of yacc.c  */
+#line 327 "exemple.y"
+    {
+                         Variable* var=g_hash_table_lookup(table_variable,(yyvsp[(1) - (3)].texte));
+                                        if(var!=NULL){
+                                            
+                                                
+                                                    printf(" Call to method ==> %s \n", strdup((yyvsp[(1) - (3)].texte))); 
+                                                
+                                               
+                                                
+                                        }else{
+                                                 printf(" ERROR Method not Declared ==> %s \n", strdup((yyvsp[(1) - (3)].texte))); 
+                                        }
+                         
+                         ;}
+    break;
+
+  case 79:
+
+/* Line 1455 of yacc.c  */
+#line 342 "exemple.y"
+    {
+                         Variable* var=g_hash_table_lookup(table_variable,(yyvsp[(1) - (4)].texte));
+                                        if(var!=NULL){
+                                            
+                                                
+                                                    printf(" Call to method ==> %s \n", strdup((yyvsp[(1) - (4)].texte))); 
+                                                
+                                               
+                                                
+                                        }else{
+                                                 printf(" ERROR Method not Declared ==> %s \n", strdup((yyvsp[(1) - (4)].texte))); 
+                                        }
+                         
+                         ;}
     break;
 
   case 80:
 
 /* Line 1455 of yacc.c  */
-#line 160 "exemple.y"
+#line 356 "exemple.y"
     {yyerror (" expected )  on line : "); ;}
+    break;
+
+  case 86:
+
+/* Line 1455 of yacc.c  */
+#line 366 "exemple.y"
+    {
+                         Variable* var=g_hash_table_lookup(table_variable,(yyvsp[(1) - (1)].texte));
+                                        if(var!=NULL){
+                                            
+                                                if(var->affectation==0)
+                                                { printf(" ERROR Variable not initialized ==> %s \n", strdup((yyvsp[(1) - (1)].texte))); 
+                                                }else{
+                                                    printf(" Use of Variable ========> %s \n", strdup((yyvsp[(1) - (1)].texte))); 
+                                                
+                                                }
+                                                
+                                        }else{
+                                                 printf(" ERROR Variable not Declared ==> %s \n", strdup((yyvsp[(1) - (1)].texte))); 
+                                        }
+                         
+                         ;}
+    break;
+
+  case 87:
+
+/* Line 1455 of yacc.c  */
+#line 383 "exemple.y"
+    {
+                         Variable* var=g_hash_table_lookup(table_variable,(yyvsp[(1) - (4)].texte));
+                                        if(var!=NULL){
+                                            
+                                                if(var->affectation==0)
+                                                { printf(" ERROR Variable not initialized ==> %s \n", strdup((yyvsp[(1) - (4)].texte))); 
+                                                }else{
+                                                    printf(" Use of Variable ========> %s \n", strdup((yyvsp[(1) - (4)].texte))); 
+                                                }
+                                                
+                                        }else{
+                                                 printf(" ERROR Variable not Declared ==> %s \n", strdup((yyvsp[(1) - (4)].texte))); 
+                                        }
+                         
+                         ;}
     break;
 
   case 88:
 
 /* Line 1455 of yacc.c  */
-#line 171 "exemple.y"
+#line 398 "exemple.y"
     {yyerror (" expected ]  on line : "); ;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 1865 "exemple.tab.c"
+#line 2149 "exemple.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2080,14 +2364,14 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 176 "exemple.y"
+#line 403 "exemple.y"
  
 
 int yyerror(char const *msg) {
        
 	
-	fprintf(stderr, "%s %d\n", msg,yylineno);
-	return 0;
+	fprintf(stderr, "%s %d\n", msg,((int) yylineno/2) + 1 );
+    return 0;
 	
 	
 }
@@ -2096,6 +2380,8 @@ extern FILE *yyin;
 
 main()
 {
+
+    table_variable=g_hash_table_new_full(g_str_hash,g_str_equal,free,free);
 
 //      #ifdef YYDEBUG
 //   yydebug = 1;

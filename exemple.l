@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include "exemple.tab.h"
 %}
@@ -33,7 +34,7 @@ COMMA ","
 OPPAFFECT ":="
 BOOLEAN ("true"|"false")
 STRING ("\"")({LETTER}|{CHIFFRE})*("\"")
-TYPE ("integer"|"cardinal"|"shortint"|"smallint"|"longint"|"int64"|"byte"|"word"|"longword")
+TYPE ("integer"|"cardinal"|"shortint"|"smallint"|"longint"|"int64"|"byte"|"word"|"longword"|"real"|"char")
 
 
 %%
@@ -82,7 +83,10 @@ TYPE ("integer"|"cardinal"|"shortint"|"smallint"|"longint"|"int64"|"byte"|"word"
 {SEMICOLON}                                                                          return SEMICOLON;
 {COLON}                                                                          return COLON;
 {LITERAL_NUMBER}                                                                                 return LITERAL_NUMBER; 
-{ID}                                                                                 return INDENTIFIER; 
+{ID}                                                                                 {
+    yylval.texte = strdup(yytext);
+    return INDENTIFIER;
+}
 
 {IDERRONE}              {fprintf(stderr,"illegal identifier \'%s\' on line :%d\n",yytext,yylineno);}
 {COMMENT_MULTI_LINE_ERROR}              {fprintf(stderr," Unterminated comment \'%s\' on line :%d\n",yytext,yylineno);}

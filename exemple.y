@@ -2,55 +2,100 @@
 	
 
 #include <stdio.h>	
+#include <string.h>
+#include <stdlib.h>
+#include <glib.h>
+
+
 int yyerror(char const *msg);	
 int yylex(void);
+
+int context = 0;
 extern int yylineno;
+
+GHashTable* table_variable;
+
+typedef struct Variable Variable;
+
+struct Variable{
+        char* type;
+        int affectation;
+};
 
 %}
 
+%union {
+        long nombre;
+        char* texte;
+
+}
+
+
+%type<texte> programs		
+%type<texte> ListDeclarations    
+%type<texte> Declaration       
+%type<texte> DeclarationCorp    
+%type<texte> ListIndentifiers   
+%type<texte> Type                         
+%type<texte> DeclarationOfMethods 
+%type<texte> DeclarationOfMethod  
+%type<texte> MethodHeader       
+%type<texte> Arguments         
+%type<texte> ListParameters     
+%type<texte> ComposedInstruction   
+%type<texte> ListInstructions     
+%type<texte> Instruction        
+%type<texte> Variable           
+%type<texte> MethodCall        
+%type<texte> ListExpressions    
+%type<texte> Expression        
+%type<texte> Factor  
+
 %locations
 
-%token PROGRAM
-%token BEGINP
-%token END
-%token PROCEDURE
-%token FUNCTION
-%token CONST
-%token VAR
-%token IF
-%token THEN
-%token ELSE
-%token DO
-%token WHILE
-%token GOTO
-%token CASE
-%token DOWNTO
-%token FOR_LOOP
-%token REPEAT
-%token OPPBINARY
-%token WRITE
-%token READ
-%token TYPE
-%token STRING_VALUE
-%token BOOLEAN_VALUE
-%token COMMA
-%token OPEN_ROUND_BRACKETS
-%token CLOSE_ROUND_BRACKETS
-%token OPEN_SQUARE_BRACKETS
-%token CLOSE_SQUARE_BRACKETS
-%token NUMBER
-%token OPPAFFECT
-%token ADDOP
-%token COMPOP
-%token MODOP
-%token MODLOP
-%token SEMICOLON
-%token COLON
-%token INDENTIFIER
-%token TWO_POINTS
-%token OF
-%token ARRAY
-%token LITERAL_NUMBER
+
+
+%token<texte> PROGRAM
+%token<texte> BEGINP
+%token<texte> END
+%token<texte> PROCEDURE
+%token<texte> FUNCTION
+%token<texte> CONST
+%token<texte> VAR
+%token<texte> IF
+%token<texte> THEN
+%token<texte> ELSE
+%token<texte> DO
+%token<texte> WHILE
+%token<texte> GOTO
+%token<texte> CASE
+%token<texte> DOWNTO
+%token<texte> FOR_LOOP
+%token<texte> REPEAT
+%token<texte> OPPBINARY
+%token<texte> WRITE
+%token<texte> READ
+%token<texte> TYPE
+%token<texte> STRING_VALUE
+%token<texte> BOOLEAN_VALUE
+%token<texte> COMMA
+%token<texte> OPEN_ROUND_BRACKETS
+%token<texte> CLOSE_ROUND_BRACKETS
+%token<texte> OPEN_SQUARE_BRACKETS
+%token<texte> CLOSE_SQUARE_BRACKETS
+%token<texte> NUMBER
+%token<texte> OPPAFFECT
+%token<texte> ADDOP
+%token<texte> COMPOP
+%token<texte> MODOP
+%token<texte> MODLOP
+%token<texte> SEMICOLON
+%token<texte> COLON
+%token<texte> INDENTIFIER
+%token<texte> TWO_POINTS
+%token<texte> OF
+%token<texte> ARRAY
+%token<texte> LITERAL_NUMBER
  
 
 %start programs
@@ -76,8 +121,42 @@ DeclarationCorp     : ListIndentifiers COLON Type
                         | ListIndentifiers COLON error {yyerror (" Type expected on line : "); };
                         | ListIndentifiers error Type {yyerror (" Colon expected on line : "); };
 
-ListIndentifiers    : INDENTIFIER
+ListIndentifiers    : INDENTIFIER {
+
+                        printf(" Declaring Variable ==> %s \n", strdup($1));
+                        Variable* var=malloc(sizeof(Variable));
+                        if(var!=NULL){
+                                var->type=strdup("variable");
+                                var->affectation=0;
+                                if(!g_hash_table_insert(table_variable,strdup($1),var)){
+                                        fprintf(stderr,"ERREUR - PROBLEME CREATION VARIABLE !\n");
+                                        exit(-1);
+                                }
+                        }else{
+                                fprintf(stderr,"ERREUR - PROBLEME ALLOCATION MEMOIRE VARIABLE !\n");
+                                exit(-1);
+                        }
+
+}
                         | INDENTIFIER COMMA ListIndentifiers
+                        {
+
+                        printf(" Declaring Variable ==> %s \n", strdup($1));
+                        Variable* var=malloc(sizeof(Variable));
+                        if(var!=NULL){
+                                var->type=strdup("variable");
+                                var->affectation=0;
+                                if(!g_hash_table_insert(table_variable,strdup($1),var)){
+                                        fprintf(stderr,"ERREUR - PROBLEME CREATION VARIABLE !\n");
+                                        exit(-1);
+                                }
+                        }else{
+                                fprintf(stderr,"ERREUR - PROBLEME ALLOCATION MEMOIRE VARIABLE !\n");
+                                exit(-1);
+                        }
+
+}
+
                         | INDENTIFIER COMMA error {yyerror (" Unexpected Comma on line : "); };
 
 Type                : TYPE
@@ -95,13 +174,88 @@ DeclarationOfMethods : DeclarationOfMethod
 
 DeclarationOfMethod  : MethodHeader ComposedInstruction
                         | MethodHeader ListDeclarations ComposedInstruction
+                        {
+                            context--; 
+                            printf(" ============ Change to Context ========> %d \n", context);
+                        }
                         | MethodHeader ListDeclarations error  {yyerror (" Begin expected onx line : "); };
 
 MethodHeader         : PROCEDURE INDENTIFIER 
+{
+                        context++; 
+                        printf(" ============ Change to Context ========> %d \n", context);
+                        printf(" Declaring Procedure ==> %s \n", strdup($2));
+        
+                        Variable* var=malloc(sizeof(Variable));
+                        if(var!=NULL){
+                                var->type=strdup("method");
+                                if(!g_hash_table_insert(table_variable,strdup($2),var)){
+                                        fprintf(stderr,"ERREUR - PROBLEME CREATION VARIABLE !\n");
+                                        exit(-1);
+                                }
+                        }else{
+                                fprintf(stderr,"ERREUR - PROBLEME ALLOCATION MEMOIRE VARIABLE !\n");
+                                exit(-1);
+                        }
+
+
+
+}
                         | PROCEDURE INDENTIFIER Arguments
+                        {
+                        context++; 
+                        printf(" ============ Change to Context ========> %d \n", context);
+                        printf(" Declaring Procedure ==> %s \n", strdup($2));
+                         Variable* var=malloc(sizeof(Variable));
+                        if(var!=NULL){
+                                var->type=strdup("method");
+                                if(!g_hash_table_insert(table_variable,strdup($2),var)){
+                                        fprintf(stderr,"ERREUR - PROBLEME CREATION VARIABLE !\n");
+                                        exit(-1);
+                                }
+                        }else{
+                                fprintf(stderr,"ERREUR - PROBLEME ALLOCATION MEMOIRE VARIABLE !\n");
+                                exit(-1);
+                        }
+
+}
                         | PROCEDURE error  {yyerror (" expected Procedure name on line : "); };
                         | FUNCTION INDENTIFIER
+                                                {
+                        context++; 
+                        printf(" ============ Change to Context ========> %d \n", context);
+                        printf(" Declaring Function ==> %s \n", strdup($2));
+                         Variable* var=malloc(sizeof(Variable));
+                        if(var!=NULL){
+                                var->type=strdup("method");
+                                if(!g_hash_table_insert(table_variable,strdup($2),var)){
+                                        fprintf(stderr,"ERREUR - PROBLEME CREATION VARIABLE !\n");
+                                        exit(-1);
+                                }
+                        }else{
+                                fprintf(stderr,"ERREUR - PROBLEME ALLOCATION MEMOIRE VARIABLE !\n");
+                                exit(-1);
+                        }
+
+}
                         | FUNCTION INDENTIFIER Arguments
+                                                {
+                        context++; 
+                        printf(" ============ Change to Context ========> %d \n", context);
+                        printf(" Declaring Function ==> %s \n", strdup($2));
+                         Variable* var=malloc(sizeof(Variable));
+                        if(var!=NULL){
+                                var->type=strdup("method");
+                                if(!g_hash_table_insert(table_variable,strdup($2),var)){
+                                        fprintf(stderr,"ERREUR - PROBLEME CREATION VARIABLE !\n");
+                                        exit(-1);
+                                }
+                        }else{
+                                fprintf(stderr,"ERREUR - PROBLEME ALLOCATION MEMOIRE VARIABLE !\n");
+                                exit(-1);
+                        }
+
+}
                         | FUNCTION error {yyerror (" expected Function name on line : "); };
 
 Arguments           : OPEN_ROUND_BRACKETS ListParameters CLOSE_ROUND_BRACKETS
@@ -119,7 +273,21 @@ ListInstructions      : Instruction SEMICOLON
                         | Instruction SEMICOLON ListInstructions
                         | Instruction error  {yyerror (" expected ;  on line : "); };
 
-Instruction         : Variable OPPAFFECT Expression 
+Instruction         : Variable OPPAFFECT Expression                         
+{
+                         Variable* var=g_hash_table_lookup(table_variable,$1);
+                                        if(var!=NULL){
+                                            
+                                                    printf(" Affecting value to ==> %s \n ", strdup($1));
+                                                    printf(" Use of Variable ========> %s \n", strdup($1)); 
+                                                    var->affectation = var->affectation +1;
+                                                
+                                                
+                                        }else{
+                                                 printf(" ERROR Variable not Declared ==> %s \n", strdup($1)); 
+                                        }
+                         
+                         }
                         | MethodCall
                         | ComposedInstruction
 
@@ -151,12 +319,40 @@ Instruction         : Variable OPPAFFECT Expression
                         | READ  error CLOSE_ROUND_BRACKETS  {yyerror (" expected (  on line : "); };
                         | READ OPEN_ROUND_BRACKETS  error {yyerror (" expected )  on line : "); };
 
-Variable            : INDENTIFIER 
+Variable           : INDENTIFIER
                         | INDENTIFIER OPEN_SQUARE_BRACKETS Expression CLOSE_SQUARE_BRACKETS
                         | INDENTIFIER OPEN_SQUARE_BRACKETS Expression error {yyerror (" expected ]  on line : "); };
 
 MethodCall          : INDENTIFIER OPEN_ROUND_BRACKETS CLOSE_ROUND_BRACKETS
+                                                 {
+                         Variable* var=g_hash_table_lookup(table_variable,$1);
+                                        if(var!=NULL){
+                                            
+                                                
+                                                    printf(" Call to method ==> %s \n", strdup($1)); 
+                                                
+                                               
+                                                
+                                        }else{
+                                                 printf(" ERROR Method not Declared ==> %s \n", strdup($1)); 
+                                        }
+                         
+                         }
                         | INDENTIFIER OPEN_ROUND_BRACKETS ListExpressions CLOSE_ROUND_BRACKETS
+                           {
+                         Variable* var=g_hash_table_lookup(table_variable,$1);
+                                        if(var!=NULL){
+                                            
+                                                
+                                                    printf(" Call to method ==> %s \n", strdup($1)); 
+                                                
+                                               
+                                                
+                                        }else{
+                                                 printf(" ERROR Method not Declared ==> %s \n", strdup($1)); 
+                                        }
+                         
+                         }
                         | INDENTIFIER OPEN_ROUND_BRACKETS ListExpressions  error {yyerror (" expected )  on line : "); };
 
 ListExpressions     : Expression
@@ -167,7 +363,38 @@ Expression          : Factor
                         | Factor MODLOP Factor
 
 Factor              : INDENTIFIER
+                         {
+                         Variable* var=g_hash_table_lookup(table_variable,$1);
+                                        if(var!=NULL){
+                                            
+                                                if(var->affectation==0)
+                                                { printf(" ERROR Variable not initialized ==> %s \n", strdup($1)); 
+                                                }else{
+                                                    printf(" Use of Variable ========> %s \n", strdup($1)); 
+                                                
+                                                }
+                                                
+                                        }else{
+                                                 printf(" ERROR Variable not Declared ==> %s \n", strdup($1)); 
+                                        }
+                         
+                         }
                         | INDENTIFIER OPEN_SQUARE_BRACKETS Expression CLOSE_SQUARE_BRACKETS
+                         {
+                         Variable* var=g_hash_table_lookup(table_variable,$1);
+                                        if(var!=NULL){
+                                            
+                                                if(var->affectation==0)
+                                                { printf(" ERROR Variable not initialized ==> %s \n", strdup($1)); 
+                                                }else{
+                                                    printf(" Use of Variable ========> %s \n", strdup($1)); 
+                                                }
+                                                
+                                        }else{
+                                                 printf(" ERROR Variable not Declared ==> %s \n", strdup($1)); 
+                                        }
+                         
+                         }
                         | INDENTIFIER OPEN_SQUARE_BRACKETS Expression error {yyerror (" expected ]  on line : "); };
                         | LITERAL_NUMBER
                         | OPEN_ROUND_BRACKETS Expression CLOSE_ROUND_BRACKETS 
@@ -178,8 +405,8 @@ Factor              : INDENTIFIER
 int yyerror(char const *msg) {
        
 	
-	fprintf(stderr, "%s %d\n", msg,yylineno);
-	return 0;
+	fprintf(stderr, "%s %d\n", msg,((int) yylineno/2) + 1 );
+    return 0;
 	
 	
 }
@@ -188,6 +415,8 @@ extern FILE *yyin;
 
 main()
 {
+
+    table_variable=g_hash_table_new_full(g_str_hash,g_str_equal,free,free);
 
 //      #ifdef YYDEBUG
 //   yydebug = 1;
