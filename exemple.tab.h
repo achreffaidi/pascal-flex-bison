@@ -90,7 +90,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 27 "exemple.y"
+#line 36 "exemple.y"
 
         long nombre;
         char* texte;

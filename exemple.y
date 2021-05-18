@@ -17,10 +17,19 @@ GHashTable* table_variable;
 
 typedef struct Variable Variable;
 
+
 struct Variable{
         char* type;
         int affectation;
 };
+
+
+char* getRef(char* id,int context){
+
+char buffer [50];
+sprintf (buffer, "%s - %d ", id, context);
+return buffer;
+}
 
 %}
 
@@ -123,13 +132,18 @@ DeclarationCorp     : ListIndentifiers COLON Type
 
 ListIndentifiers    : INDENTIFIER {
 
+                            if(g_hash_table_lookup(table_variable,getRef($1,context))!=NULL){
+        
+                                                    printf(" Error Variable already declared ==> %s \n", strdup($1)); 
+                             exit(1) ;                  
+                            }
                         printf(" Declaring Variable ==> %s \n", strdup($1));
                         Variable* var=malloc(sizeof(Variable));
                         if(var!=NULL){
                                 var->type=strdup("variable");
                                 var->affectation=0;
-                                if(!g_hash_table_insert(table_variable,strdup($1),var)){
-                                        fprintf(stderr,"ERREUR - PROBLEME CREATION VARIABLE !\n");
+                                if(!g_hash_table_insert(table_variable,getRef($1,context),var)){
+                                        fprintf(stderr,"ERREUR - PROBLEME CREATION VARIABLE 2 !\n");
                                         exit(-1);
                                 }
                         }else{
@@ -141,12 +155,18 @@ ListIndentifiers    : INDENTIFIER {
                         | INDENTIFIER COMMA ListIndentifiers
                         {
 
+                            if(g_hash_table_lookup(table_variable,getRef($1,context))!=NULL){
+        
+                                                    printf(" Error Variable already declared ==> %s \n", strdup($1)); 
+                             exit(1) ;                  
+                            }
+
                         printf(" Declaring Variable ==> %s \n", strdup($1));
                         Variable* var=malloc(sizeof(Variable));
                         if(var!=NULL){
                                 var->type=strdup("variable");
                                 var->affectation=0;
-                                if(!g_hash_table_insert(table_variable,strdup($1),var)){
+                                if(!g_hash_table_insert(table_variable,getRef($1,context),var)){
                                         fprintf(stderr,"ERREUR - PROBLEME CREATION VARIABLE !\n");
                                         exit(-1);
                                 }
@@ -182,14 +202,18 @@ DeclarationOfMethod  : MethodHeader ComposedInstruction
 
 MethodHeader         : PROCEDURE INDENTIFIER 
 {
+                            if(g_hash_table_lookup(table_variable,getRef($2,context))!=NULL){
+        
+                                                    printf(" Error Procedure already declared ==> %s \n", strdup($2)); 
+                             exit(1) ;                  
+                            }
                         context++; 
                         printf(" ============ Change to Context ========> %d \n", context);
                         printf(" Declaring Procedure ==> %s \n", strdup($2));
-        
                         Variable* var=malloc(sizeof(Variable));
                         if(var!=NULL){
                                 var->type=strdup("method");
-                                if(!g_hash_table_insert(table_variable,strdup($2),var)){
+                                if(!g_hash_table_insert(table_variable,getRef($2,context),var)){
                                         fprintf(stderr,"ERREUR - PROBLEME CREATION VARIABLE !\n");
                                         exit(-1);
                                 }
@@ -203,13 +227,20 @@ MethodHeader         : PROCEDURE INDENTIFIER
 }
                         | PROCEDURE INDENTIFIER Arguments
                         {
+
+                            if(g_hash_table_lookup(table_variable,getRef($2,context))!=NULL){
+        
+                                                    printf(" Error Procedure already declared ==> %s \n", strdup($2)); 
+                             exit(1) ;                  
+                            }
+
                         context++; 
                         printf(" ============ Change to Context ========> %d \n", context);
                         printf(" Declaring Procedure ==> %s \n", strdup($2));
                          Variable* var=malloc(sizeof(Variable));
                         if(var!=NULL){
                                 var->type=strdup("method");
-                                if(!g_hash_table_insert(table_variable,strdup($2),var)){
+                                if(!g_hash_table_insert(table_variable,getRef($2,context),var)){
                                         fprintf(stderr,"ERREUR - PROBLEME CREATION VARIABLE !\n");
                                         exit(-1);
                                 }
@@ -222,13 +253,20 @@ MethodHeader         : PROCEDURE INDENTIFIER
                         | PROCEDURE error  {yyerror (" expected Procedure name on line : "); };
                         | FUNCTION INDENTIFIER
                                                 {
+
+                                                    if(g_hash_table_lookup(table_variable,getRef($2,context))!=NULL){
+        
+                                                    printf(" Error Function already declared ==> %s \n", strdup($2)); 
+                             exit(1) ;                  
+                            }
+
                         context++; 
                         printf(" ============ Change to Context ========> %d \n", context);
                         printf(" Declaring Function ==> %s \n", strdup($2));
                          Variable* var=malloc(sizeof(Variable));
                         if(var!=NULL){
                                 var->type=strdup("method");
-                                if(!g_hash_table_insert(table_variable,strdup($2),var)){
+                                if(!g_hash_table_insert(table_variable,getRef($2,context),var)){
                                         fprintf(stderr,"ERREUR - PROBLEME CREATION VARIABLE !\n");
                                         exit(-1);
                                 }
@@ -240,13 +278,20 @@ MethodHeader         : PROCEDURE INDENTIFIER
 }
                         | FUNCTION INDENTIFIER Arguments
                                                 {
+
+                                                    if(g_hash_table_lookup(table_variable,getRef($2,context))!=NULL){
+        
+                                                    printf(" Error Function already declared ==> %s \n", strdup($2)); 
+                             exit(1) ;                  
+                            }
+
                         context++; 
                         printf(" ============ Change to Context ========> %d \n", context);
                         printf(" Declaring Function ==> %s \n", strdup($2));
                          Variable* var=malloc(sizeof(Variable));
                         if(var!=NULL){
                                 var->type=strdup("method");
-                                if(!g_hash_table_insert(table_variable,strdup($2),var)){
+                                if(!g_hash_table_insert(table_variable,getRef($2,context),var)){
                                         fprintf(stderr,"ERREUR - PROBLEME CREATION VARIABLE !\n");
                                         exit(-1);
                                 }
@@ -275,7 +320,7 @@ ListInstructions      : Instruction SEMICOLON
 
 Instruction         : Variable OPPAFFECT Expression                         
 {
-                         Variable* var=g_hash_table_lookup(table_variable,$1);
+                         Variable* var=g_hash_table_lookup(table_variable,getRef($1,context));
                                         if(var!=NULL){
                                             
                                                     printf(" Affecting value to ==> %s \n ", strdup($1));
@@ -325,7 +370,7 @@ Variable           : INDENTIFIER
 
 MethodCall          : INDENTIFIER OPEN_ROUND_BRACKETS CLOSE_ROUND_BRACKETS
                                                  {
-                         Variable* var=g_hash_table_lookup(table_variable,$1);
+                         Variable* var=g_hash_table_lookup(table_variable,getRef($1,context));
                                         if(var!=NULL){
                                             
                                                 
@@ -340,7 +385,7 @@ MethodCall          : INDENTIFIER OPEN_ROUND_BRACKETS CLOSE_ROUND_BRACKETS
                          }
                         | INDENTIFIER OPEN_ROUND_BRACKETS ListExpressions CLOSE_ROUND_BRACKETS
                            {
-                         Variable* var=g_hash_table_lookup(table_variable,$1);
+                         Variable* var=g_hash_table_lookup(table_variable,getRef($1,context));
                                         if(var!=NULL){
                                             
                                                 
@@ -364,11 +409,12 @@ Expression          : Factor
 
 Factor              : INDENTIFIER
                          {
-                         Variable* var=g_hash_table_lookup(table_variable,$1);
+                         Variable* var=g_hash_table_lookup(table_variable,getRef($1,context));
                                         if(var!=NULL){
                                             
                                                 if(var->affectation==0)
                                                 { printf(" ERROR Variable not initialized ==> %s \n", strdup($1)); 
+                                                exit(1) ; 
                                                 }else{
                                                     printf(" Use of Variable ========> %s \n", strdup($1)); 
                                                 
@@ -376,12 +422,13 @@ Factor              : INDENTIFIER
                                                 
                                         }else{
                                                  printf(" ERROR Variable not Declared ==> %s \n", strdup($1)); 
+                                                 exit(1) ; 
                                         }
                          
                          }
                         | INDENTIFIER OPEN_SQUARE_BRACKETS Expression CLOSE_SQUARE_BRACKETS
                          {
-                         Variable* var=g_hash_table_lookup(table_variable,$1);
+                         Variable* var=g_hash_table_lookup(table_variable,getRef($1,context));
                                         if(var!=NULL){
                                             
                                                 if(var->affectation==0)
@@ -392,6 +439,7 @@ Factor              : INDENTIFIER
                                                 
                                         }else{
                                                  printf(" ERROR Variable not Declared ==> %s \n", strdup($1)); 
+                                                 exit(1) ; 
                                         }
                          
                          }
