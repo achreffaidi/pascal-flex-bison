@@ -1,41 +1,69 @@
+/* ===========================================================
+  CECI EST UN COMMENTAIRE 
+  @@@@@ ce caractere est correct dans un commentaire, mais pas
+  ailleursd (non decrit dans la bnf de MiniPasc)
+  TP1 - ift2030 - automne 2002
+  ============================================================ */
+
 program tp1Source4;
 
+/* =======================
+  des variables globales
+  ===================== */
   
-var x,y: integer;
+var x,y,k,e: integer;
 var tab1: array [1..10] of integer;
-var x,a: integer;
 
-procedure encore 
-
-var a: integer;
+/* ====================================================
+  une procedure sans parametre, son nom est encore,
+  elle possede une variable locale a
+  ==================================================== */
+ 
+procedure encore ;
+var a,h,g: integer;
 
 begin
 
-  a:= 5;
-
+ a:= 3; 
+ g:= 5;
   write(a);
+  a := g + 20;
 	
   if (a) then
-    a := a   
+    a := a + a    
   else
     a := a + 20;
 
   write(a);
 
 end
+  
 
-procedure encore 
+  
+/* ====================================================
+  le bloc principal (ne peut acceder qu'aux variables
+  globles (comme en C ou en Java)
+  ==================================================== */
 
 begin
 
-end
+  x := 3+2;
+  tab1 := 3; 
+  x := x + tab1[2];
+  y := tab1[2] + tab1[2];
+  
+  tab1[0]  := 3; 
+  tab1[1]  := 5;
+  tab1[11] := 4;
 
-begin 
-x:= y; 
-x := 3+2;
-  x := x + tab2[2];
-  y := x;
-
-  maProcedure();
+  tab1[x+y] := 3; /*Bla, Bla
+  Bla Bla
+     Bla
+       Bla
+          Bla*/ 
+       
+  
+  //encore();
+  /*ERREUR SEMANTIQUE: la procedure encore n'a pas de parametre*/
   
 end 

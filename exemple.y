@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <glib.h>
 
-
 int yyerror(char const *msg);	
 int yylex(void);
 
@@ -36,7 +35,6 @@ return buffer;
 %union {
         long nombre;
         char* texte;
-
 }
 
 
@@ -143,7 +141,7 @@ ListIndentifiers    : INDENTIFIER {
                                 var->type=strdup("variable");
                                 var->affectation=0;
                                 if(!g_hash_table_insert(table_variable,getRef($1,context),var)){
-                                        fprintf(stderr,"ERREUR - PROBLEME CREATION VARIABLE 2 !\n");
+                                        printf(stderr,"ERREUR - PROBLEME CREATION VARIABLE !\n");
                                         exit(-1);
                                 }
                         }else{
@@ -200,7 +198,7 @@ DeclarationOfMethod  : MethodHeader ComposedInstruction
                         }
                         | MethodHeader ListDeclarations error  {yyerror (" Begin expected onx line : "); };
 
-MethodHeader         : PROCEDURE INDENTIFIER 
+MethodHeader         : PROCEDURE INDENTIFIER SEMICOLON
 {
                             if(g_hash_table_lookup(table_variable,getRef($2,context))!=NULL){
         
@@ -225,7 +223,7 @@ MethodHeader         : PROCEDURE INDENTIFIER
 
 
 }
-                        | PROCEDURE INDENTIFIER Arguments
+                        | PROCEDURE INDENTIFIER Arguments SEMICOLON
                         {
 
                             if(g_hash_table_lookup(table_variable,getRef($2,context))!=NULL){
@@ -251,7 +249,7 @@ MethodHeader         : PROCEDURE INDENTIFIER
 
 }
                         | PROCEDURE error  {yyerror (" expected Procedure name on line : "); };
-                        | FUNCTION INDENTIFIER
+                        | FUNCTION INDENTIFIER SEMICOLON
                                                 {
 
                                                     if(g_hash_table_lookup(table_variable,getRef($2,context))!=NULL){
@@ -276,7 +274,7 @@ MethodHeader         : PROCEDURE INDENTIFIER
                         }
 
 }
-                        | FUNCTION INDENTIFIER Arguments
+                        | FUNCTION INDENTIFIER Arguments SEMICOLON
                                                 {
 
                                                     if(g_hash_table_lookup(table_variable,getRef($2,context))!=NULL){
@@ -432,7 +430,7 @@ Factor              : INDENTIFIER
                                         if(var!=NULL){
                                             
                                                 if(var->affectation==0)
-                                                { printf(" ERROR Variable not initialized ==> %s \n", strdup($1)); 
+                                                { printf("ERROR Variable not initialized ==> %s \n", strdup($1)); 
                                                 }else{
                                                     printf(" Use of Variable ========> %s \n", strdup($1)); 
                                                 }
